@@ -15,6 +15,10 @@ by Arturo Guadalupi
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetClientSecure.h>
+#include <WiFi.h>
+
+const char* ssid     = "Travis-WiFi";     // your network SSID (name of wifi network)
+const char* password = "2Washington99"; // your network password
 
 const char* test_root_ca= \
 "-----BEGIN CERTIFICATE-----\n" \
@@ -59,6 +63,21 @@ unsigned long testInterval = 15000;
 unsigned long lastTest = 0;
 
 void setup() {
+  // Open serial communications and wait for port to open:
+  Serial.begin(115200);
+
+  delay(100);
+  Serial.print("Attempting to connect to SSID: ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+  // attempt to connect to Wifi network:
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    // wait 1 second for re-trying
+    delay(1000);
+  }
+
   delay(1000);
   // You can use Ethernet.init(pin) to configure the CS pin
   //Ethernet.init(10);  // Most Arduino shields
@@ -68,8 +87,7 @@ void setup() {
   //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
   Ethernet.init(4);  // ESP32 with Adafruit Featherwing Ethernet
 
-  // Open serial communications and wait for port to open:
-  Serial.begin(115200);
+
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
