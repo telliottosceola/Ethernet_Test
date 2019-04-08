@@ -17,8 +17,11 @@
 #include <algorithm>
 #include <string>
 #include "ssl_client.h"
-#include "WiFi.h"
-
+#include "Dns.h"
+#include <Ethernet.h>
+// #include "WiFi.h"
+EthernetClient eClient;
+DNSClient dns;
 
 const char *pers = "esp32-tls";
 
@@ -56,18 +59,21 @@ int start_ssl_client(sslclient_context *ssl_client, const char *host, uint32_t p
     ssl_client->socket = -1;
     log_v("1");
 
-    Serial.printf("%i, %i, %i\n", AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    // Serial.printf("%i, %i, %i\n", AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    ssl_client->socket = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    // ssl_client->socket = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     log_v("2");
     delay(50);
-    if (ssl_client->socket < 0) {
-        log_e("ERROR opening socket");
-        return ssl_client->socket;
-    }
+    // if (ssl_client->socket < 0) {
+    //     log_e("ERROR opening socket");
+    //     return ssl_client->socket;
+    // }
 
-    IPAddress srv((uint32_t)0);
-    if(!WiFiGenericClass::hostByName(host, srv)){
+    IPAddress srv(35,227,42,200);
+    // if(!WiFiGenericClass::hostByName(host, srv)){
+    //     return -1;
+    // }
+    if(!dns.getHostByName(host, srv)){
         return -1;
     }
 
@@ -76,17 +82,23 @@ int start_ssl_client(sslclient_context *ssl_client, const char *host, uint32_t p
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = srv;
     serv_addr.sin_port = htons(port);
-
-    if (lwip_connect(ssl_client->socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0) {
-        timeout = 30000;
-        lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-        lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-        lwip_setsockopt(ssl_client->socket, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
-        lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
-    } else {
-        log_e("Connect to Server failed!");
-        return -1;
+    if(eClient.connect(srv, port)){
+      log_e("Connected to server");
+    }else{
+      log_e("Connect to Server failed!");
+      return -1;
     }
+
+    // if (lwip_connect(ssl_client->socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0) {
+    //     timeout = 30000;
+    //     lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    //     lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+    //     lwip_setsockopt(ssl_client->socket, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
+    //     lwip_setsockopt(ssl_client->socket, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+    // } else {
+    //     log_e("Connect to Server failed!");
+    //     return -1;
+    // }
 
     fcntl( ssl_client->socket, F_SETFL, fcntl( ssl_client->socket, F_GETFL, 0 ) | O_NONBLOCK );
 
@@ -196,10 +208,14 @@ int start_ssl_client(sslclient_context *ssl_client, const char *host, uint32_t p
     unsigned long handshake_start_time=millis();
     while ((ret = mbedtls_ssl_handshake(&ssl_client->ssl_ctx)) != 0) {
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
+          log_e("Fail 1");
             return handle_error(ret);
         }
-        if((millis()-handshake_start_time)>ssl_client->handshake_timeout)
-			return -1;
+        if((millis()-handshake_start_time)>ssl_client->handshake_timeout){
+          log_e("Fail 2");
+          return -1;
+        }
+
 	    vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 

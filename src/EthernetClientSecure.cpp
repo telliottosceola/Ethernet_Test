@@ -32,7 +32,7 @@ EthernetClientSecure::EthernetClientSecure()
 
     sslclient = new sslclient_context;
     ssl_init(sslclient);
-    sslclient->socket = -1;
+    sslclient->socket = 443;
     sslclient->handshake_timeout = 120000;
     _CA_cert = NULL;
     _cert = NULL;

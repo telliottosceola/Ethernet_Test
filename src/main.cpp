@@ -66,25 +66,25 @@ void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
 
-  delay(100);
-  Serial.print("Attempting to connect to SSID: ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-  // attempt to connect to Wifi network:
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    // wait 1 second for re-trying
-    delay(1000);
-  }
+  // delay(100);
+  // Serial.print("Attempting to connect to SSID: ");
+  // Serial.println(ssid);
+  //
+  // WiFi.begin(ssid, password);
+  // // attempt to connect to Wifi network:
+  // unsigned long start = millis();
+  // unsigned long timeout = 15000;
+  // while (WiFi.status() != WL_CONNECTED && millis() > start+timeout) {
+  //   Serial.print(".");
+  //   // wait 1 second for re-trying
+  //   delay(1000);
+  // }
+  // delay(1000);
+  // WiFi.disconnect();
 
   delay(1000);
+
   // You can use Ethernet.init(pin) to configure the CS pin
-  //Ethernet.init(10);  // Most Arduino shields
-  //Ethernet.init(5);   // MKR ETH shield
-  //Ethernet.init(0);   // Teensy 2.0
-  //Ethernet.init(20);  // Teensy++ 2.0
-  //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
   Ethernet.init(4);  // ESP32 with Adafruit Featherwing Ethernet
 
 

@@ -37,4 +37,6 @@ int get_ssl_receive(sslclient_context *ssl_client, uint8_t *data, int length);
 bool verify_ssl_fingerprint(sslclient_context *ssl_client, const char* fp, const char* domain_name);
 bool verify_ssl_dn(sslclient_context *ssl_client, const char* domain_name);
 
+
+
 #endif

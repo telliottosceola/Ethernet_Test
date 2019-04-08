@@ -51,55 +51,55 @@ void DNSClient::begin(const IPAddress& aDNSServer)
 }
 
 
-int DNSClient::inet_aton(const char* address, IPAddress& result)
-{
-	uint16_t acc = 0; // Accumulator
-	uint8_t dots = 0;
-
-	while (*address) {
-		char c = *address++;
-		if (c >= '0' && c <= '9') {
-			acc = acc * 10 + (c - '0');
-			if (acc > 255) {
-				// Value out of [0..255] range
-				return 0;
-			}
-		} else if (c == '.') {
-			if (dots == 3) {
-				// Too much dots (there must be 3 dots)
-				return 0;
-			}
-			result[dots++] = acc;
-			acc = 0;
-		} else {
-			// Invalid char
-			return 0;
-		}
-	}
-
-	if (dots != 3) {
-		// Too few dots (there must be 3 dots)
-		return 0;
-	}
-	result[3] = acc;
-	return 1;
-}
+// int DNSClient::inet_aton(const char* address, IPAddress& result)
+// {
+// 	uint16_t acc = 0; // Accumulator
+// 	uint8_t dots = 0;
+//
+// 	while (*address) {
+// 		char c = *address++;
+// 		if (c >= '0' && c <= '9') {
+// 			acc = acc * 10 + (c - '0');
+// 			if (acc > 255) {
+// 				// Value out of [0..255] range
+// 				return 0;
+// 			}
+// 		} else if (c == '.') {
+// 			if (dots == 3) {
+// 				// Too much dots (there must be 3 dots)
+// 				return 0;
+// 			}
+// 			result[dots++] = acc;
+// 			acc = 0;
+// 		} else {
+// 			// Invalid char
+// 			return 0;
+// 		}
+// 	}
+//
+// 	if (dots != 3) {
+// 		// Too few dots (there must be 3 dots)
+// 		return 0;
+// 	}
+// 	result[3] = acc;
+// 	return 1;
+// }
 
 int DNSClient::getHostByName(const char* aHostname, IPAddress& aResult, uint16_t timeout)
 {
 	int ret = 0;
 
-	// See if it's a numeric IP address
-	if (inet_aton(aHostname, aResult)) {
-		// It is, our work here is done
-		return 1;
-	}
+	// // See if it's a numeric IP address
+	// if (inet_aton(aHostname, aResult)) {
+	// 	// It is, our work here is done
+	// 	return 1;
+	// }
 
 	// Check we've got a valid DNS server to use
 	if (iDNSServer == INADDR_NONE) {
 		return INVALID_SERVER;
 	}
-	
+
 	// Find a socket to use
 	if (iUdp.begin(1024+(millis() & 0xF)) == 1) {
 		// Try up to three times
@@ -351,4 +351,3 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
 	// If we get here then we haven't found an answer
 	return -10; //INVALID_RESPONSE;
 }
-
